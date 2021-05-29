@@ -56,18 +56,78 @@
     <button>Trigger a Global Error</button>
   </section>
 
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
   <script>
-    let calculateBtn = document.querySelector('#calculate');
-    calculateBtn.addEventListener('click', () => {
+    window.TrackJS && TrackJS.install({ 
+      token: "6dd1c7088bf545519f8c941e11e0d9b8",
+      application: "lab-9"
+    });
+  </script>
+                        
+
+  <script>
+    class InputError extends Error {
+      constructor(message) {
+        super(message); // (1)
+        this.name = "InputError"; // (2)
+      }
+    }
+
+    function add() {
       let output = document.querySelector('output');
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
+      if(isNaN(parseInt(firstNum)))
+        throw new InputError('First number is not a number');
+      if(isNaN(parseInt(secondNum)))
+        throw new InputError('Second number is not a number');
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      let val = eval(`${firstNum} ${operator} ${secondNum}`);
+      output.innerHTML = val;
+    }
+
+    let calculateBtn = document.querySelector('#calculate');
+    calculateBtn.addEventListener('click', () => {
+      try {
+        add();
+      } catch (err) {
+        if(err instanceof InputError) {
+          console.error('InputError Try entering real numbers: ' + err.message);
+        } else {
+          throw err;
+        }
+      } finally {
+        console.log('Result calculation attempted.');
+      }
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
     // TODO - Make buttons functional
+    errorBtns[0].addEventListener('click', () => { console.log('Console Log Demo'); });
+    errorBtns[1].addEventListener('click', () => { console.error('This is a console error' )});
+    errorBtns[2].addEventListener('click', () => { console.dir(errorBtns) });
+    errorBtns[3].addEventListener('click', () => { console.dirxml(document.querySelector('body')); });
+    errorBtns[4].addEventListener('click', () => { 
+      console.error({'msg': "this is an error"});
+    });
+    errorBtns[5].addEventListener('click', () => { console.group('This is a console group beginning'); });
+    errorBtns[6].addEventListener('click', () => { console.groupEnd(); });
+    errorBtns[7].addEventListener('click', () => { console.table(['CSE 110', 'CSE 140', 'CSE 140L', 'MATH 170B']); });
+    errorBtns[8].addEventListener('click', () => { console.time('Timer'); console.log('Timer started!') });
+    errorBtns[9].addEventListener('click', () => { console.log('Timer ended!'); console.timeEnd('Timer'); });
+    function deep() { deeper(); };
+    function deeper() { deepest(); };
+    function deepest() { console.trace() };
+    errorBtns[10].addEventListener('click', () => { deep(); });
+
+    function bad() {
+      abooM('bad code!');
+    };
+
+    errorBtns[11].addEventListener('click', () => { 
+      bad(); 
+    });
+    window.onerror = console.log('Global error');
   </script>
 </body>
 </html>
